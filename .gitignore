@@ -1,0 +1,120 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+ransomrun.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*~
+.simulation_backup/
+
+# Test outputs
+test_output/
+run_detail_output.html
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Compiled files
+*.pyc
+*.pyo
+
+# Distribution / packaging
+*.zip
+*.tar.gz
+*.rar
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Elasticsearch
+elasticsearch-data/
+
+# Target data (simulation artifacts)
+target_data/
+
+# Generated images
+*.png
+*.jpg
+*.jpeg
+!static/**/*.png
+!static/**/*.jpg
+!static/**/*.jpeg
+
+# HTML outputs
+*.html
+!app/templates/**/*.html
+!app/static/**/*.html

@@ -1,0 +1,631 @@
+{% extends "base.html" %}
+
+{% block title %}Scenarios - RansomRun{% endblock %}
+{% block page_title %}Attack Scenarios{% endblock %}
+
+{% block extra_css %}
+<style>
+    .scenario-card {
+        background: linear-gradient(135deg, #18181b 0%, #1f1f24 100%);
+        border: 1px solid #27272a;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .scenario-card:hover {
+        border-color: #3f3f46;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    }
+    
+    .scenario-card.custom {
+        border-color: rgba(34, 197, 94, 0.3);
+    }
+    
+    .scenario-card.custom:hover {
+        border-color: rgba(34, 197, 94, 0.5);
+    }
+    
+    .scenario-header {
+        padding: 20px;
+        border-bottom: 1px solid #27272a;
+    }
+    
+    .scenario-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fafafa;
+        margin: 0 0 6px 0;
+    }
+    
+    .scenario-key {
+        font-family: monospace;
+        font-size: 11px;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+        padding: 3px 8px;
+        border-radius: 4px;
+    }
+    
+    .scenario-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .scenario-badge.builtin {
+        background: rgba(113, 113, 122, 0.2);
+        color: #a1a1aa;
+        border: 1px solid rgba(113, 113, 122, 0.3);
+    }
+    
+    .scenario-badge.custom {
+        background: rgba(34, 197, 94, 0.15);
+        color: #86efac;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .scenario-body {
+        padding: 20px;
+        flex: 1;
+    }
+    
+    .scenario-desc {
+        font-size: 13px;
+        color: #a1a1aa;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    .scenario-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+    }
+    
+    .scenario-tag {
+        padding: 4px 10px;
+        background: #27272a;
+        border-radius: 6px;
+        font-size: 11px;
+        color: #71717a;
+        font-weight: 500;
+    }
+    
+    .scenario-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
+        font-size: 11px;
+        color: #52525b;
+    }
+    
+    .scenario-footer {
+        padding: 16px 20px;
+        border-top: 1px solid #27272a;
+        background: rgba(15, 15, 20, 0.5);
+    }
+    
+    .scenario-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-scenario {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-scenario.view {
+        background: #27272a;
+        color: #a1a1aa;
+        flex: 1;
+    }
+    
+    .btn-scenario.view:hover {
+        background: #3f3f46;
+        color: #fafafa;
+    }
+    
+    .btn-scenario.clone {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+    }
+    
+    .btn-scenario.clone:hover {
+        background: rgba(59, 130, 246, 0.25);
+    }
+    
+    .btn-scenario.run {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .btn-scenario.run:hover {
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        transform: translateY(-1px);
+    }
+    
+    .btn-scenario.edit {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+    }
+    
+    .btn-scenario.delete {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #27272a;
+    }
+    
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    
+    .section-icon.builtin {
+        background: rgba(139, 92, 246, 0.15);
+        color: #8b5cf6;
+    }
+    
+    .section-icon.custom {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+    }
+    
+    .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fafafa;
+        margin: 0;
+    }
+    
+    .section-subtitle {
+        font-size: 12px;
+        color: #71717a;
+        margin: 0;
+    }
+    
+    .safety-banner {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .safety-icon {
+        width: 44px;
+        height: 44px;
+        background: rgba(34, 197, 94, 0.15);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #22c55e;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    
+    .safety-text h4 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #86efac;
+        margin: 0 0 4px 0;
+    }
+    
+    .safety-text p {
+        font-size: 13px;
+        color: #71717a;
+        margin: 0;
+    }
+    
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    
+    .btn-action {
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-action.import {
+        background: #27272a;
+        color: #a1a1aa;
+        border: 1px solid #3f3f46;
+    }
+    
+    .btn-action.import:hover {
+        background: #3f3f46;
+        color: #fafafa;
+    }
+    
+    .btn-action.create {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+    }
+    
+    .btn-action.create:hover {
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        transform: translateY(-1px);
+    }
+    
+    .empty-custom {
+        border: 2px dashed #3f3f46;
+        border-radius: 16px;
+        padding: 48px 24px;
+        text-align: center;
+        background: rgba(15, 15, 20, 0.3);
+    }
+    
+    .empty-custom i {
+        font-size: 48px;
+        color: #3f3f46;
+        margin-bottom: 16px;
+    }
+    
+    .empty-custom h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #a1a1aa;
+        margin: 0 0 8px 0;
+    }
+    
+    .empty-custom p {
+        font-size: 14px;
+        color: #71717a;
+        margin: 0 0 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Action Bar -->
+<div class="action-bar">
+    <p style="color: #71717a; margin: 0; font-size: 14px;">Manage ransomware simulation scenarios</p>
+    <div class="d-flex gap-3">
+        <button class="btn-action import" onclick="showImportModal()">
+            <i class="bi bi-upload"></i> Import Scenario
+        </button>
+        <a href="/scenarios/new" class="btn-action create">
+            <i class="bi bi-plus-lg"></i> Create Custom Scenario
+        </a>
+    </div>
+</div>
+
+<!-- Safety Banner -->
+<div class="safety-banner">
+    <div class="safety-icon">
+        <i class="bi bi-shield-check"></i>
+    </div>
+    <div class="safety-text">
+        <h4>Lab-Safe Simulation Only</h4>
+        <p>All behaviors are safe simulations. No real encryption, no network exfiltration, no destructive actions.</p>
+    </div>
+</div>
+
+<!-- Built-in Scenarios Section -->
+<div class="section-header">
+    <div class="section-icon builtin">
+        <i class="bi bi-box-seam"></i>
+    </div>
+    <div>
+        <h5 class="section-title">Built-in Scenarios</h5>
+        <p class="section-subtitle">Pre-configured attack scenarios for common ransomware families</p>
+    </div>
+</div>
+<div class="row g-4 mb-5">
+    {% for scenario in scenarios if not scenario.is_custom %}
+    <div class="col-lg-4 col-md-6">
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="scenario-title">{{ scenario.name }}</h3>
+                        <span class="scenario-key">{{ scenario.key }}</span>
+                    </div>
+                    <span class="scenario-badge builtin">Built-in</span>
+                </div>
+            </div>
+            <div class="scenario-body">
+                <p class="scenario-desc">{{ scenario.description[:180] }}{% if scenario.description|length > 180 %}...{% endif %}</p>
+                {% if scenario.config and scenario.config.tags %}
+                <div class="scenario-tags">
+                    {% for tag in scenario.config.tags[:4] %}
+                    <span class="scenario-tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="scenario-footer">
+                <div class="scenario-actions">
+                    <a href="/scenarios/{{ scenario.id }}" class="btn-scenario view">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                    <button class="btn-scenario clone" onclick="cloneScenario({{ scenario.id }}, '{{ scenario.name }}')">
+                        <i class="bi bi-copy"></i> Clone
+                    </button>
+                    <a href="/simulate?scenario_id={{ scenario.id }}" class="btn-scenario run">
+                        <i class="bi bi-play-fill"></i> Run
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="empty-custom">
+            <i class="bi bi-box-seam"></i>
+            <h3>No Built-in Scenarios</h3>
+            <p>Built-in scenarios are seeded on startup.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Custom Scenarios Section -->
+<div class="section-header">
+    <div class="section-icon custom">
+        <i class="bi bi-pencil-square"></i>
+    </div>
+    <div>
+        <h5 class="section-title">Custom Scenarios</h5>
+        <p class="section-subtitle">Your custom-built attack scenarios</p>
+    </div>
+</div>
+<div class="row g-4 mb-4">
+    {% set custom_scenarios = scenarios | selectattr('is_custom') | list %}
+    {% if custom_scenarios %}
+    {% for scenario in custom_scenarios %}
+    <div class="col-lg-4 col-md-6">
+        <div class="scenario-card custom">
+            <div class="scenario-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="scenario-title">{{ scenario.name }}</h3>
+                        <span class="scenario-key">{{ scenario.key }}</span>
+                    </div>
+                    <span class="scenario-badge custom">Custom</span>
+                </div>
+            </div>
+            <div class="scenario-body">
+                <p class="scenario-desc">{{ scenario.description[:180] if scenario.description else 'No description' }}{% if scenario.description and scenario.description|length > 180 %}...{% endif %}</p>
+                {% if scenario.config and scenario.config.tags %}
+                <div class="scenario-tags">
+                    {% for tag in scenario.config.tags[:4] %}
+                    <span class="scenario-tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="scenario-meta">
+                    <span><i class="bi bi-person me-1"></i>{{ scenario.created_by or 'admin' }}</span>
+                    {% if scenario.created_at %}
+                    <span><i class="bi bi-calendar me-1"></i>{{ scenario.created_at.strftime('%Y-%m-%d') }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="scenario-footer">
+                <div class="scenario-actions">
+                    <a href="/scenarios/{{ scenario.id }}" class="btn-scenario view">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="/scenarios/{{ scenario.id }}/edit" class="btn-scenario edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <button class="btn-scenario clone" onclick="cloneScenario({{ scenario.id }}, '{{ scenario.name }}')">
+                        <i class="bi bi-copy"></i>
+                    </button>
+                    <button class="btn-scenario delete" onclick="deleteScenario({{ scenario.id }}, '{{ scenario.name }}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <a href="/simulate?scenario_id={{ scenario.id }}" class="btn-scenario run" style="flex: 1;">
+                        <i class="bi bi-play-fill"></i> Run
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="empty-custom">
+            <i class="bi bi-plus-circle"></i>
+            <h3>No Custom Scenarios Yet</h3>
+            <p>Create your own ransomware simulation scenarios or clone a built-in one.</p>
+            <a href="/scenarios/new" class="btn-action create">
+                <i class="bi bi-plus-lg"></i> Create Custom Scenario
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background: #18181b; border: 1px solid #27272a;">
+            <div class="modal-header" style="border-bottom: 1px solid #27272a;">
+                <h5 class="modal-title"><i class="bi bi-upload me-2"></i>Import Scenario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Paste the exported scenario JSON below. A new unique key will be generated.
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Scenario JSON</label>
+                    <textarea id="importJson" class="form-control" rows="10" 
+                        style="background: #09090b; border-color: #27272a; color: #fff; font-family: monospace;"
+                        placeholder='{"name": "My Scenario", "category": "crypto", "config": {...}}'></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #27272a;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="importScenario()">
+                    <i class="bi bi-upload me-2"></i>Import
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clone Modal -->
+<div class="modal fade" id="cloneModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: #18181b; border: 1px solid #27272a;">
+            <div class="modal-header" style="border-bottom: 1px solid #27272a;">
+                <h5 class="modal-title"><i class="bi bi-copy me-2"></i>Clone Scenario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cloneSourceId">
+                <div class="mb-3">
+                    <label class="form-label">New Scenario Name</label>
+                    <input type="text" id="cloneName" class="form-control" 
+                        style="background: #09090b; border-color: #27272a; color: #fff;">
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #27272a;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-info" onclick="submitClone()">
+                    <i class="bi bi-copy me-2"></i>Clone
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showImportModal() {
+    new bootstrap.Modal(document.getElementById('importModal')).show();
+}
+
+function cloneScenario(id, name) {
+    document.getElementById('cloneSourceId').value = id;
+    document.getElementById('cloneName').value = name + ' (Copy)';
+    new bootstrap.Modal(document.getElementById('cloneModal')).show();
+}
+
+async function submitClone() {
+    const id = document.getElementById('cloneSourceId').value;
+    const name = document.getElementById('cloneName').value;
+    
+    try {
+        const response = await fetch(`/api/scenarios/${id}/clone?new_name=${encodeURIComponent(name)}`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Clone failed: ' + data.message);
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function deleteScenario(id, name) {
+    if (!confirm(`Delete scenario "${name}"?\n\nThis cannot be undone.`)) return;
+    
+    try {
+        const response = await fetch(`/api/scenarios/${id}`, { method: 'DELETE' });
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Delete failed: ' + data.message);
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+async function exportScenario(id) {
+    try {
+        const response = await fetch(`/api/scenarios/${id}/export`);
+        const data = await response.json();
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `scenario_${data.key}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        alert('Export failed: ' + e.message);
+    }
+}
+
+async function importScenario() {
+    const jsonText = document.getElementById('importJson').value;
+    
+    try {
+        const importData = JSON.parse(jsonText);
+        
+        const response = await fetch('/api/scenarios/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(importData)
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Import failed: ' + data.message);
+        }
+    } catch (e) {
+        alert('Invalid JSON or import error: ' + e.message);
+    }
+}
+</script>
+{% endblock %}
